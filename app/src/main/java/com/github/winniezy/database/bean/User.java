@@ -9,21 +9,23 @@ public class User {
 
     // 得到User对应列名
     @DbField("u_id")
-    private int id;
+    private Integer id;//fix:查询失败，由于int非object导致认为默认值0是查询条件
     private String username;
     private String password;
 
-    public User(int id, String username, String password) {
+    public User(){}
+
+    public User(Integer id, String username, String password) {
         this.id = id;
         this.username = username;
         this.password = password;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

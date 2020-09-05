@@ -9,8 +9,10 @@ import com.github.winniezy.database.annotation.DbField;
 import com.github.winniezy.database.annotation.DbTable;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -134,6 +136,112 @@ public class BaseDao<T> implements IBaseDao<T> {
         Map<String, String> map = getValues(entity);
         ContentValues values = getContentValues(map);
         return sqLiteDatabase.insert(tableName, null, values);
+    }
+
+    @Override
+    public long update(T entity, T where) {
+        return 0;
+    }
+
+    @Override
+    public long delete(T where) {
+        return 0;
+    }
+
+    @Override
+    public List<T> query(T where) {
+        return query(where, null, null, null);
+    }
+
+    @Override
+    public List<T> query(T where, String orderBy, Integer startIndex, Integer limit) {
+        Map map = getValues(where);
+        // select * from tablename limit 0,10
+        String limitString = null;
+        if (startIndex != null && limit != null){
+            limitString = startIndex + " , " + limit;
+        }
+//        String selections = "id = 1 and name = 111";
+//        String selectionArgs = String[]{};
+        // select * from tablename where id=? and name=? limit 0,10
+        Condition condition = new Condition(map);
+        Cursor cursor = sqLiteDatabase.query(tableName, null, condition.whereCause,
+                condition.whereArgs, null, null, orderBy, limitString);
+        // 定义一个解析游标的方法
+        List<T> result = getResult(cursor, where);
+        cursor.close();
+        return result;
+    }
+
+    private List<T> getResult(Cursor cursor, T where) {
+        ArrayList list = new ArrayList();
+        Object item = null;
+        while (cursor.moveToNext()) {
+            try {
+                item = where.getClass().newInstance();
+                Iterator iterator = cacheMap.entrySet().iterator();//成员变量
+                while (iterator.hasNext()){
+                    Map.Entry entry = (Map.Entry) iterator.next();
+                    // 获取列名
+                    String columnName = (String) entry.getKey();
+                    // 以列名获取到列名在游标中的位置
+                    Integer columnIndex = cursor.getColumnIndex(columnName);
+                    // 获取成员变量的类型
+                     Field field = (Field) entry.getValue();
+                     Class type = field.getType();
+                     // cursor.getString(columnIndex);
+                     if (columnIndex != -1){
+                         if (type == String.class) {
+                             // User user = new User();
+                             // user.setId(1);
+                             // 以下使用反射形式相当于 id.set(user,1);
+                             field.set(item, cursor.getString(columnIndex));
+                         } else if (type == Integer.class) {
+                             field.set(item, cursor.getInt(columnIndex));
+                         } else if (type == Long.class) {
+                             field.set(item, cursor.getLong(columnIndex));
+                         } else if (type == Double.class) {
+                             field.set(item, cursor.getDouble(columnIndex));
+                         } else if (type == byte[].class) {
+                             field.set(item, cursor.getBlob(columnIndex));
+                         } else {
+                             //不支持的类类型
+                             continue;
+                         }
+                     }
+                }
+                list.add(item);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
+    }
+
+    private class Condition{
+        private String whereCause;
+        private String[] whereArgs;
+
+        public Condition(Map<String, String> whereMap){
+            ArrayList<String> list = new ArrayList();
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(" 1=1");
+            // 获取所有字段名
+            Set<String> keys = whereMap.keySet();
+            Iterator<String> iterator = keys.iterator();
+            while (iterator.hasNext()){
+                String key = (String) iterator.next();
+                String value = whereMap.get(key);
+                if (value != null){
+                    stringBuilder.append(" and " + key + "=?");
+                    list.add(value);
+                }
+            }
+            this.whereCause = stringBuilder.toString();
+            this.whereArgs = list.toArray(new String[list.size()]);
+        }
     }
 
     private Map<String, String> getValues(T entity) {
