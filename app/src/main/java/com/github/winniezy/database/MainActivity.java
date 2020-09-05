@@ -9,6 +9,7 @@ import android.view.View;
 import com.github.winniezy.database.bean.User;
 import com.github.winniezy.database.db.BaseDao;
 import com.github.winniezy.database.db.BaseDaoFactory;
+import com.github.winniezy.database.db.OrderDao;
 
 import java.util.List;
 
@@ -68,7 +69,8 @@ public class MainActivity extends AppCompatActivity {
                 BaseDao baseDao = BaseDaoFactory.getInstance().getBaseDao(User.class);
                 User where = new User();
                 where.setUsername("winnieyzhou");
-                baseDao.delete(where);
+                // BaseDao类型扩展实例
+                // OrderDao orderDao = BaseDaoFactory.getInstance().getBaseDao(OrderDao.class, User.class);
             }
         });
     }

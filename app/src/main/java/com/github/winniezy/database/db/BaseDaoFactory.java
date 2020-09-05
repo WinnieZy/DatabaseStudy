@@ -32,4 +32,18 @@ public class BaseDaoFactory {
         }
         return baseDao;
     }
+
+    // 根据所需BaseDao子类类型生产BaseDao对象
+    public <T extends BaseDao<M>, M> T getBaseDao(Class<T> daoClass, Class<M> entityClass){
+        BaseDao baseDao = null;
+        try {
+            baseDao = daoClass.newInstance();
+            baseDao.init(sqLiteDatabase, entityClass);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        }
+        return (T) baseDao;
+    }
 }
