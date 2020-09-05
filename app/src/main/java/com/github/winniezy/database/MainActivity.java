@@ -55,11 +55,11 @@ public class MainActivity extends AppCompatActivity {
                 User user = new User();
                 user.setId(2);
                 user.setUsername("winnieyzhou");
-                user.setPassword("654321");
+                user.setPassword("123456");
 
                 User where = new User();
                 where.setId(2);
-//                baseDao.update(user,where);
+                baseDao.update(user,where);
             }
         });
         findViewById(R.id.delete).setOnClickListener(new View.OnClickListener() {
@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
                 BaseDao baseDao = BaseDaoFactory.getInstance().getBaseDao(User.class);
                 User where = new User();
                 where.setUsername("winnieyzhou");
-//                baseDao.delete(where);
+                baseDao.delete(where);
             }
         });
     }

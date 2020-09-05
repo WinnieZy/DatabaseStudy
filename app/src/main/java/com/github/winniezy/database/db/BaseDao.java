@@ -140,12 +140,19 @@ public class BaseDao<T> implements IBaseDao<T> {
 
     @Override
     public long update(T entity, T where) {
-        return 0;
+        // 将传进来的对象 成员变量和对应值转为map
+        Map map = getValues(entity);
+        ContentValues contentValues = getContentValues(map);
+        Map whereMap = getValues(where);
+        Condition condition = new Condition(whereMap);
+        return sqLiteDatabase.update(tableName, contentValues, condition.whereCause, condition.whereArgs);
     }
 
     @Override
     public long delete(T where) {
-        return 0;
+        Map map = getValues(where);
+        Condition condition = new Condition(map);
+        return sqLiteDatabase.delete(tableName,condition.whereCause,condition.whereArgs);
     }
 
     @Override
