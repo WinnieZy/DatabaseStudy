@@ -2,6 +2,8 @@ package com.github.winniezy.database;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -11,9 +13,10 @@ import com.github.winniezy.database.bean.User;
 import com.github.winniezy.database.db.BaseDao;
 import com.github.winniezy.database.db.BaseDaoFactory;
 import com.github.winniezy.database.db.BaseDaoSubFactory;
-import com.github.winniezy.database.db.OrderDao;
 import com.github.winniezy.database.db.PhotoDao;
+import com.github.winniezy.database.db.PrivateDatabaseEnums;
 import com.github.winniezy.database.db.UserDao;
+import com.github.winniezy.database.upgrade.UpgradeManager;
 
 import java.util.Date;
 import java.util.List;
@@ -110,9 +113,29 @@ public class MainActivity extends AppCompatActivity {
                 PhotoDao photoDao = BaseDaoSubFactory.getInstance().getBaseDao(PhotoDao.class, Photo.class);
                 photoDao.insert(photo);
 
-                List<Photo> list = photoDao.query(photo);
+                List<Photo> list = photoDao.query(new Photo());
                 for (Photo photo1 : list) {
                     Log.i("winnie", photo1.toString());
+                }
+            }
+        });
+        //升级
+        findViewById(R.id.upgrade).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 取得所有的列名
+                PhotoDao photoDao = BaseDaoSubFactory.getInstance().getBaseDao(PhotoDao.class, Photo.class);
+                String[] columnNames = photoDao.getColumnNames();
+                for (String columnName : columnNames) {
+                    Log.i("winnie", columnName);
+                }
+                UpgradeManager upgradeManager = new UpgradeManager();
+                upgradeManager.startUpgradeDb(MainActivity.this);
+                SQLiteDatabase database = SQLiteDatabase.openOrCreateDatabase(PrivateDatabaseEnums.database.getValue(), null);
+                Cursor cursor = database.rawQuery("select * from tb_photo", null);
+                String[] columnNames2 = cursor.getColumnNames();
+                for (String columnName : columnNames2) {
+                    Log.i("winnie", columnName);
                 }
             }
         });

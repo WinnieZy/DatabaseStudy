@@ -180,6 +180,14 @@ public class BaseDao<T> implements IBaseDao<T> {
         return result;
     }
 
+    @Override
+    public String[] getColumnNames() {
+        // 取得所有列名
+        String sql = "select * from " +tableName+" limit 1,0";//取出第一行
+        Cursor cursor = sqLiteDatabase.rawQuery(sql,null);
+        return cursor.getColumnNames();
+    }
+
     private List<T> getResult(Cursor cursor, T where) {
         ArrayList list = new ArrayList();
         Object item = null;

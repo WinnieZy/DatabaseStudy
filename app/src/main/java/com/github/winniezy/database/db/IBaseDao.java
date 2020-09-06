@@ -8,4 +8,5 @@ public interface IBaseDao<T> {
     long delete(T where);
     List<T> query(T where);
     List<T> query(T where, String orderBy, Integer startIndex, Integer limit);
+    String[] getColumnNames();
 }

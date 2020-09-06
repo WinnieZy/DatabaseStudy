@@ -18,6 +18,9 @@ public class BaseDaoSubFactory extends BaseDaoFactory {
     // 根据所需BaseDao子类类型生产BaseDao对象
     public <T extends BaseDao<M>, M> T getBaseDao(Class<T> daoClass, Class<M> entityClass){
         BaseDao baseDao = null;
+        if (PrivateDatabaseEnums.database.getValue() == null){
+            return null;
+        }
         if (map.get(PrivateDatabaseEnums.database.getValue()) != null){
             return (T) map.get(PrivateDatabaseEnums.database.getValue());
         }
